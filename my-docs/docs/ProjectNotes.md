@@ -28,7 +28,7 @@ NetConnectionClassName="OnlineSubsystemSteam.SteamNetConnection"
 - Add `"OnlineSubsystemSteam"` and `"OnlineSubsystem"` to the .build file
 
 ## Accessing the subsystem
-We use sessions to handle our multiplayer experiences, and the `OnlineSubsystem` comes with an interface, `IOnlineSessionInterface`. We can store that interface like so:
+We use sessions to handle our multiplayer connections, and the `OnlineSubsystem` comes with an interface, `IOnlineSessionInterface`. We can store that interface like so:
 
 ```cpp
 // Pointer to the online session interface
