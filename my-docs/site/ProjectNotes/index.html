@@ -385,7 +385,7 @@
 <li>Add <code>"OnlineSubsystemSteam"</code> and <code>"OnlineSubsystem"</code> to the .build file</li>
 </ul>
 <h2 id="accessing-the-subsystem">Accessing the subsystem</h2>
-<p>We use sessions to handle our multiplayer experiences, and the <code>OnlineSubsystem</code> comes with an interface, <code>IOnlineSessionInterface</code>. We can store that interface like so:</p>
+<p>We use sessions to handle our multiplayer connections, and the <code>OnlineSubsystem</code> comes with an interface, <code>IOnlineSessionInterface</code>. We can store that interface like so:</p>
 <div class="language-cpp highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="c1">// Pointer to the online session interface</span>
 </span><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="n">TSharedPtr</span><span class="o">&lt;</span><span class="k">class</span><span class="w"> </span><span class="nc">IOnlineSession</span><span class="p">,</span><span class="w"> </span><span class="n">ESPMode</span><span class="o">::</span><span class="n">ThreadSafe</span><span class="o">&gt;</span><span class="w"> </span><span class="n">OnlineSessionInterface</span><span class="p">;</span>
 </span></code></pre></div>
