@@ -488,7 +488,7 @@
 <p>Before we initialize the delegate, we need to create a callback function which has a specific signature:</p>
 <div class="language-cpp highlight"><pre><span></span><code><span id="__span-6-1"><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="kt">void</span><span class="w"> </span><span class="nf">OnCreateSessionComplete_Callback</span><span class="p">(</span><span class="n">FName</span><span class="w"> </span><span class="n">SessionName</span><span class="p">,</span><span class="w"> </span><span class="kt">bool</span><span class="w"> </span><span class="n">bWasSuccessful</span><span class="p">);</span>
 </span></code></pre></div>
-<p>Now can initialize the delegate in the constructor and bind our callback at the same time like so:</p>
+<p>Now we can initialize the delegate in the constructor and bind our callback at the same time like so:</p>
 <div class="language-cpp highlight"><pre><span></span><code><span id="__span-7-1"><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a><span class="n">AMenuSystem_MPCharacter</span><span class="o">::</span><span class="n">AMenuSystem_MPCharacter</span><span class="p">()</span><span class="o">:</span>
 </span><span id="__span-7-2"><a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a><span class="w">    </span><span class="n">CreateSessionCompleteDelegate</span><span class="p">(</span><span class="n">FOnCreateSessionCompleteDelegate</span><span class="o">::</span><span class="n">CreateUObject</span><span class="p">(</span><span class="k">this</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">ThisClass</span><span class="o">::</span><span class="n">OnCreateSessionComplete_Callback</span><span class="p">))</span>
 </span><span id="__span-7-3"><a id="__codelineno-7-3" name="__codelineno-7-3" href="#__codelineno-7-3"></a><span class="p">{</span>
@@ -561,15 +561,15 @@ When Steam is done handling the session creation, Unreal calls <code>OnCreateSes
 </span><span id="__span-9-33"><a id="__codelineno-9-33" name="__codelineno-9-33" href="#__codelineno-9-33"></a><span class="p">}</span>
 </span></code></pre></div>
 <blockquote>
-<p>We hardcoded the map name, but this can easily be a variable and <code>?listen</code> be appended</p>
+<p>We hardcoded the map name, but this can easily be a variable and <code>?listen</code> appended</p>
 </blockquote>
 <p>This effectively moves the host to the specified level and configures it to be a listen server.</p>
 <hr />
 <h2 id="joining-a-session">Joining a Session</h2>
-<p>Just like creating a session, we need a delegate, a callback function to bind to that delegate, and a function we can use to encapsulate our join logic. Joining sessions also requires that we search for and find sessions, so we need an extra delegate, callback, and a special<code>TSharedPtr&lt;FOnlineSessionSearch&gt; SessionSearch;</code> member variable so we can store search results:</p>
+<p>Just like creating a session we need a delegate, a callback function to bind to that delegate, and a function we can use to encapsulate our join logic. Joining sessions also requires that we search for and find sessions, so we need an extra delegate, callback, and a special<code>TSharedPtr&lt;FOnlineSessionSearch&gt; SessionSearch;</code> member variable so we can store search results:</p>
 <div class="language-cpp highlight"><pre><span></span><code><span id="__span-10-1"><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a><span class="k">protected</span><span class="o">:</span>
 </span><span id="__span-10-2"><a id="__codelineno-10-2" name="__codelineno-10-2" href="#__codelineno-10-2"></a><span class="w">    </span><span class="n">UFUNCTION</span><span class="p">(</span><span class="n">BlueprintCallable</span><span class="p">)</span>
-</span><span id="__span-10-3"><a id="__codelineno-10-3" name="__codelineno-10-3" href="#__codelineno-10-3"></a><span class="w">        </span><span class="kt">void</span><span class="w"> </span><span class="n">JoinGameSession</span><span class="p">();</span>
+</span><span id="__span-10-3"><a id="__codelineno-10-3" name="__codelineno-10-3" href="#__codelineno-10-3"></a><span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="n">JoinGameSession</span><span class="p">();</span>
 </span><span id="__span-10-4"><a id="__codelineno-10-4" name="__codelineno-10-4" href="#__codelineno-10-4"></a>
 </span><span id="__span-10-5"><a id="__codelineno-10-5" name="__codelineno-10-5" href="#__codelineno-10-5"></a><span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="nf">OnFindSessionsComplete_Callback</span><span class="p">(</span><span class="kt">bool</span><span class="w"> </span><span class="n">bWasSuccessful</span><span class="p">);</span>
 </span><span id="__span-10-6"><a id="__codelineno-10-6" name="__codelineno-10-6" href="#__codelineno-10-6"></a><span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="nf">OnJoinSessionComplete_Callback</span><span class="p">(</span><span class="n">FName</span><span class="w"> </span><span class="n">SessionName</span><span class="p">,</span><span class="w"> </span><span class="n">EOnJoinSessionCompleteResult</span><span class="o">::</span><span class="n">Type</span><span class="w"> </span><span class="n">Result</span><span class="p">);</span>
