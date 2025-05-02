@@ -68,8 +68,12 @@ IOnlineSubsystem* OnlineSubsystem = IOnlineSubsystem::Get();
 ```
 
 ---
+## Sessions
+
+Sessions are used by Steam/Unreal to connect players. Steam creates sessions for us, which takes time since data has to travel across the internet, so the `IOnlineSessionInterface` has delegates we can create and bind callbacks to that provide information to us when Steam sends data back to Unreal.
+
+---
 ## Creating a Session
-Steam creates sessions for us, which takes time since data has to travel across the internet, so the `IOnlineSessionInterface` has delegates we can create and bind callbacks to that provide information to us when Steam sends data back to Unreal.
 
 First, we need a function we can call that will handle creating a session for us:
 
@@ -128,7 +132,168 @@ void AMenuSystem_MPCharacter::CreateGameSession()
 	SessionSettings->bShouldAdvertise = true;
 	SessionSettings->bUsesPresence = true;
 	SessionSettings->bUseLobbiesIfAvailable = true;
+	SessionSettings->Set(FName("MatchType"), FString("FreeForAll"), EOnlineDataAdvertisementType::ViaOnlineServiceAndPing);
 	const ULocalPlayer* LocalPlayer = GetWorld()->GetFirstLocalPlayerFromController();
 	OnlineSessionInterface->CreateSession(*LocalPlayer->GetPreferredUniqueNetId(), NAME_GameSession, *SessionSettings);
+}
+```
+When Steam is done handling the session creation, Unreal calls `OnCreateSessionComplete_Callback()` because it was assigned to its delegate list. This allows us to call `ServerTravel()`:
+
+```cpp
+void AMenuSystem_MPCharacter::OnCreateSessionComplete_Callback(FName SessionName, bool bWasSuccessful)
+{
+	if (bWasSuccessful)
+	{
+		if (GEngine)
+		{
+			GEngine->AddOnScreenDebugMessage(
+				-1,
+				10,
+				FColor::Cyan,
+				FString::Printf(TEXT("Created session: %s"), *SessionName.ToString())
+			);
+		}
+
+		UWorld* World = GetWorld();
+		if (World)
+		{
+			World->ServerTravel(FString("/Game/Maps/Lobby?listen"));
+		}
+	}
+	else
+	{
+		if (GEngine)
+		{
+			GEngine->AddOnScreenDebugMessage(
+				-1,
+				10,
+				FColor::Red,
+				FString(TEXT("Failed to create session!"))
+			);
+		}
+	}
+}
+```
+>We hardcoded the map name, but this can easily be a variable and `?listen` be appended
+
+This effectively moves the host to the specified level and configures it to be a listen server.
+
+---
+## Joining a Session
+
+Just like creating a session, we need a delegate, a callback function to bind to that delegate, and a function we can use to encapsulate our join logic. Joining sessions also requires that we search for and find sessions, so we need an extra delegate, callback, and a special`TSharedPtr<FOnlineSessionSearch> SessionSearch;` member variable so we can store search results:
+
+```cpp
+protected:
+	UFUNCTION(BlueprintCallable)
+		void JoinGameSession();
+
+	void OnFindSessionsComplete_Callback(bool bWasSuccessful);
+	void OnJoinSessionComplete_Callback(FName SessionName, EOnJoinSessionCompleteResult::Type Result);
+
+private:
+	FOnFindSessionsCompleteDelegate FindSessionsCompleteDelegate;
+	FOnJoinSessionCompleteDelegate JoinSessionCompleteDelegate;
+
+	TSharedPtr<FOnlineSessionSearch> SessionSearch; // Stores search results
+```
+>Make sure to initialize and bind the callback to the delegate like we did in `CreateGameSession()`
+
+In our `JoinGameSession()` function we first add the delegate to the `OnlineSessionInterface`'s delegate list, configure our search results, and call `FindSessions()`:
+
+```cpp
+void AMenuSystem_MPCharacter::JoinGameSession()
+{
+	// Find game sessions
+
+	if (!OnlineSessionInterface.IsValid()) return;
+
+	OnlineSessionInterface->AddOnFindSessionsCompleteDelegate_Handle(FindSessionsCompleteDelegate);
+
+	SessionSearch = MakeShareable(new FOnlineSessionSearch());
+	SessionSearch->MaxSearchResults = 10000;
+	SessionSearch->bIsLanQuery = false;
+	SessionSearch->QuerySettings.Set(SEARCH_PRESENCE, true, EOnlineComparisonOp::Equals);
+
+	const ULocalPlayer* LocalPlayer = GetWorld()->GetFirstLocalPlayerFromController();
+	OnlineSessionInterface->FindSessions(*LocalPlayer->GetPreferredUniqueNetId(), SessionSearch.ToSharedRef());
+}
+```
+>We search for 10,000 sessions because we're using dev app ID 480 and there could be thousands of results, so our search needs to be very wide
+
+When Steam is done handling the search, Unreal calls `OnFindSessionsComplete_Callback()` with which we can gather information about the result. There seems to be some out of date information on how to handle this next bit, as part of the Unreal code will soon be deprecated but there's no update on what to replace the deprecated bit with. Because of this, the internet has found a bit of a hacky workaround:
+
+```cpp
+void AMenuSystem_MPCharacter::OnFindSessionsComplete_Callback(bool bWasSuccessful)
+{
+	if (!OnlineSessionInterface.IsValid()) return;
+	
+	for (FOnlineSessionSearchResult Result : SessionSearch->SearchResults)
+	{
+		FString Id = Result.GetSessionIdStr();
+		FString User = Result.Session.OwningUserName;
+		FString MatchType;
+		Result.Session.SessionSettings.Get(FName("MatchType"), MatchType); // "MatchType" can be changed to a variable later
+		if (GEngine)
+		{
+			GEngine->AddOnScreenDebugMessage(
+				-1,
+				10,
+				FColor::Yellow,
+				FString::Printf(TEXT("Id: %s, User: %s"), *Id, *User)
+			);
+		}
+		if (MatchType == "FreeForAll")
+		{
+			if (GEngine)
+			{
+				GEngine->AddOnScreenDebugMessage(
+					-1,
+					10,
+					FColor::Yellow,
+					FString::Printf(TEXT("Joining match type %s"), *MatchType)
+				);
+			}
+
+			// Steam complains about bUseLobbiesIfAvailable and bUsesPresence matching
+			// so changing these in the results is unfortunately required. At least
+			// it's a pretty simple workaround. Will likely need more testing in a 
+			// production environment but this works for now.
+			Result.Session.SessionSettings.bUseLobbiesIfAvailable = true;
+			Result.Session.SessionSettings.bUsesPresence = true;
+
+			OnlineSessionInterface->AddOnJoinSessionCompleteDelegate_Handle(JoinSessionCompleteDelegate);
+			const ULocalPlayer* LocalPlayer = GetWorld()->GetFirstLocalPlayerFromController();
+			OnlineSessionInterface->JoinSession(*LocalPlayer->GetPreferredUniqueNetId(), NAME_GameSession, Result);
+		}
+	}
+}
+```
+If this succeeds, we call `JoinSession()`. This results in the `OnJoinSessionComplete_Callback()` firing which allows us to pull the joiner into the session with the host:
+
+```cpp
+void AMenuSystem_MPCharacter::OnJoinSessionComplete_Callback(FName SessionName, EOnJoinSessionCompleteResult::Type Result)
+{
+	if (!OnlineSessionInterface.IsValid()) return;
+
+	FString Address;
+	if (OnlineSessionInterface->GetResolvedConnectString(NAME_GameSession, Address))
+	{
+		if (GEngine)
+		{
+			GEngine->AddOnScreenDebugMessage(
+				-1,
+				10,
+				FColor::Green,
+				FString::Printf(TEXT("Connect String: %s"), *Address)
+			);
+		}
+	}
+	
+	APlayerController* PlayerController = GetGameInstance()->GetFirstLocalPlayerController();
+	if (PlayerController)
+	{
+		PlayerController->ClientTravel(Address, ETravelType::TRAVEL_Absolute);
+	}
 }
 ```
