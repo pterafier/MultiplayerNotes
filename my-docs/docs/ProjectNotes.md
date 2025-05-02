@@ -1,5 +1,4 @@
 # Online Subsystem
-
 This contains notes about the online subsystem
 
 ---
@@ -69,12 +68,10 @@ IOnlineSubsystem* OnlineSubsystem = IOnlineSubsystem::Get();
 
 ---
 ## Sessions
-
 Sessions are used by Steam/Unreal to connect players. Steam creates sessions for us, which takes time since data has to travel across the internet, so the `IOnlineSessionInterface` has delegates we can create and bind callbacks to that provide information to us when Steam sends data back to Unreal.
 
 ---
 ## Creating a Session
-
 First, we need a function we can call that will handle creating a session for us:
 
 ```cpp
@@ -180,7 +177,6 @@ This effectively moves the host to the specified level and configures it to be a
 
 ---
 ## Joining a Session
-
 Just like creating a session we need a delegate, a callback function to bind to that delegate, and a function we can use to encapsulate our join logic. Joining sessions also requires that we search for and find sessions, so we need an extra delegate, callback, and a special`TSharedPtr<FOnlineSessionSearch> SessionSearch;` member variable so we can store search results:
 
 ```cpp
