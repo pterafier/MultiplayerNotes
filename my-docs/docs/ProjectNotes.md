@@ -95,7 +95,7 @@ Before we initialize the delegate, we need to create a callback function which h
 void OnCreateSessionComplete_Callback(FName SessionName, bool bWasSuccessful);
 ```
 
-Now can initialize the delegate in the constructor and bind our callback at the same time like so:
+Now we can initialize the delegate in the constructor and bind our callback at the same time like so:
 
 ```cpp
 AMenuSystem_MPCharacter::AMenuSystem_MPCharacter():
@@ -174,19 +174,19 @@ void AMenuSystem_MPCharacter::OnCreateSessionComplete_Callback(FName SessionName
 	}
 }
 ```
->We hardcoded the map name, but this can easily be a variable and `?listen` be appended
+>We hardcoded the map name, but this can easily be a variable and `?listen` appended
 
 This effectively moves the host to the specified level and configures it to be a listen server.
 
 ---
 ## Joining a Session
 
-Just like creating a session, we need a delegate, a callback function to bind to that delegate, and a function we can use to encapsulate our join logic. Joining sessions also requires that we search for and find sessions, so we need an extra delegate, callback, and a special`TSharedPtr<FOnlineSessionSearch> SessionSearch;` member variable so we can store search results:
+Just like creating a session we need a delegate, a callback function to bind to that delegate, and a function we can use to encapsulate our join logic. Joining sessions also requires that we search for and find sessions, so we need an extra delegate, callback, and a special`TSharedPtr<FOnlineSessionSearch> SessionSearch;` member variable so we can store search results:
 
 ```cpp
 protected:
 	UFUNCTION(BlueprintCallable)
-		void JoinGameSession();
+	void JoinGameSession();
 
 	void OnFindSessionsComplete_Callback(bool bWasSuccessful);
 	void OnJoinSessionComplete_Callback(FName SessionName, EOnJoinSessionCompleteResult::Type Result);
