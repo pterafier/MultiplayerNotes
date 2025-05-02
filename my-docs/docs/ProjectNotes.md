@@ -76,7 +76,7 @@ First, we need a function we can call that will handle creating a session for us
 
 ```cpp
 UFUNCTION(BlueprintCallable)
-	void CreateGameSession();
+void CreateGameSession();
 ```
 >Note that this is NOT called `CreateSession()` as that function is the blueprint version of what we're about to encapsulate in `CreateGameSession()`
 
