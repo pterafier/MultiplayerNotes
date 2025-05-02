@@ -289,6 +289,15 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#creating-a-session" class="md-nav__link">
+    <span class="md-ellipsis">
+      Creating a Session
+    </span>
+  </a>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -341,6 +350,15 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#creating-a-session" class="md-nav__link">
+    <span class="md-ellipsis">
+      Creating a Session
+    </span>
+  </a>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -384,29 +402,89 @@
 <li>Enable the <code>Online Subsystem Steam</code> plugin in the editor</li>
 <li>Add <code>"OnlineSubsystemSteam"</code> and <code>"OnlineSubsystem"</code> to the .build file</li>
 </ul>
+<hr />
 <h2 id="accessing-the-subsystem">Accessing the subsystem</h2>
-<p>We use sessions to handle our multiplayer connections, and the <code>OnlineSubsystem</code> comes with an interface, <code>IOnlineSessionInterface</code>. We can store that interface like so:</p>
+<p>We use sessions to handle our multiplayer connections, and the <code>OnlineSubsystem</code> comes with an interface, <code>IOnlineSessionInterface</code>. We can store a pointer to that interface like so:</p>
 <div class="language-cpp highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="c1">// Pointer to the online session interface</span>
 </span><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="n">TSharedPtr</span><span class="o">&lt;</span><span class="k">class</span><span class="w"> </span><span class="nc">IOnlineSession</span><span class="p">,</span><span class="w"> </span><span class="n">ESPMode</span><span class="o">::</span><span class="n">ThreadSafe</span><span class="o">&gt;</span><span class="w"> </span><span class="n">OnlineSessionInterface</span><span class="p">;</span>
 </span></code></pre></div>
+<p>However, there is a typedef that was created for our convenience called <code>IOnlineSessionPtr</code> that we can use instead of the <code>TSharedPtr</code>:</p>
+<div class="language-cpp highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="c1">// Pointer to the online session interface</span>
+</span><span id="__span-2-2"><a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="n">IOnlineSessionPtr</span><span class="w"> </span><span class="n">OnlineSessionInterface</span><span class="p">;</span>
+</span></code></pre></div>
+<blockquote>
+<p>This is possible if we <code>#include "Interfaces/OnlineSessionInterface.h"</code> in the header file of the class that's storing the pointer.</p>
+</blockquote>
 <p>Then, we can initialize and access the <code>OnlineSessionInterface</code> in the <code>.cpp</code> file like so:</p>
-<div class="language-cpp highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="c1">// For example purposes this is in the constructor of the player character</span>
-</span><span id="__span-2-2"><a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="n">IOnlineSubsystem</span><span class="o">*</span><span class="w"> </span><span class="n">OnlineSubsystem</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">IOnlineSubsystem</span><span class="o">::</span><span class="n">Get</span><span class="p">();</span>
-</span><span id="__span-2-3"><a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a><span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">OnlineSubsystem</span><span class="p">)</span>
-</span><span id="__span-2-4"><a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a><span class="w">    </span><span class="p">{</span>
-</span><span id="__span-2-5"><a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a><span class="w">        </span><span class="n">OnlineSessionInterface</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">OnlineSubsystem</span><span class="o">-&gt;</span><span class="n">GetSessionInterface</span><span class="p">();</span>
-</span><span id="__span-2-6"><a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a>
-</span><span id="__span-2-7"><a id="__codelineno-2-7" name="__codelineno-2-7" href="#__codelineno-2-7"></a><span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">GEngine</span><span class="p">)</span>
-</span><span id="__span-2-8"><a id="__codelineno-2-8" name="__codelineno-2-8" href="#__codelineno-2-8"></a><span class="w">        </span><span class="p">{</span>
-</span><span id="__span-2-9"><a id="__codelineno-2-9" name="__codelineno-2-9" href="#__codelineno-2-9"></a><span class="w">            </span><span class="n">GEngine</span><span class="o">-&gt;</span><span class="n">AddOnScreenDebugMessage</span><span class="p">(</span>
-</span><span id="__span-2-10"><a id="__codelineno-2-10" name="__codelineno-2-10" href="#__codelineno-2-10"></a><span class="w">                </span><span class="mi">-1</span><span class="p">,</span>
-</span><span id="__span-2-11"><a id="__codelineno-2-11" name="__codelineno-2-11" href="#__codelineno-2-11"></a><span class="w">                </span><span class="mi">10</span><span class="p">,</span>
-</span><span id="__span-2-12"><a id="__codelineno-2-12" name="__codelineno-2-12" href="#__codelineno-2-12"></a><span class="w">                </span><span class="n">FColor</span><span class="o">::</span><span class="n">Cyan</span><span class="p">,</span>
-</span><span id="__span-2-13"><a id="__codelineno-2-13" name="__codelineno-2-13" href="#__codelineno-2-13"></a><span class="w">                </span><span class="n">FString</span><span class="o">::</span><span class="n">Printf</span><span class="p">(</span><span class="n">TEXT</span><span class="p">(</span><span class="s">&quot;Found Subsystem %s&quot;</span><span class="p">),</span>
-</span><span id="__span-2-14"><a id="__codelineno-2-14" name="__codelineno-2-14" href="#__codelineno-2-14"></a><span class="w">                </span><span class="o">*</span><span class="n">OnlineSubsystem</span><span class="o">-&gt;</span><span class="n">GetSubsystemName</span><span class="p">().</span><span class="n">ToString</span><span class="p">())</span>
-</span><span id="__span-2-15"><a id="__codelineno-2-15" name="__codelineno-2-15" href="#__codelineno-2-15"></a><span class="w">            </span><span class="p">);</span>
-</span><span id="__span-2-16"><a id="__codelineno-2-16" name="__codelineno-2-16" href="#__codelineno-2-16"></a><span class="w">        </span><span class="p">}</span>
-</span><span id="__span-2-17"><a id="__codelineno-2-17" name="__codelineno-2-17" href="#__codelineno-2-17"></a><span class="w">    </span><span class="p">}</span><span class="w">    </span>
+<div class="language-cpp highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="c1">// For example purposes this is in the constructor of the player character</span>
+</span><span id="__span-3-2"><a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a><span class="n">IOnlineSubsystem</span><span class="o">*</span><span class="w"> </span><span class="n">OnlineSubsystem</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">IOnlineSubsystem</span><span class="o">::</span><span class="n">Get</span><span class="p">();</span>
+</span><span id="__span-3-3"><a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a><span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">OnlineSubsystem</span><span class="p">)</span>
+</span><span id="__span-3-4"><a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a><span class="w">    </span><span class="p">{</span>
+</span><span id="__span-3-5"><a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a><span class="w">        </span><span class="n">OnlineSessionInterface</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">OnlineSubsystem</span><span class="o">-&gt;</span><span class="n">GetSessionInterface</span><span class="p">();</span>
+</span><span id="__span-3-6"><a id="__codelineno-3-6" name="__codelineno-3-6" href="#__codelineno-3-6"></a>
+</span><span id="__span-3-7"><a id="__codelineno-3-7" name="__codelineno-3-7" href="#__codelineno-3-7"></a><span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">GEngine</span><span class="p">)</span>
+</span><span id="__span-3-8"><a id="__codelineno-3-8" name="__codelineno-3-8" href="#__codelineno-3-8"></a><span class="w">        </span><span class="p">{</span>
+</span><span id="__span-3-9"><a id="__codelineno-3-9" name="__codelineno-3-9" href="#__codelineno-3-9"></a><span class="w">            </span><span class="n">GEngine</span><span class="o">-&gt;</span><span class="n">AddOnScreenDebugMessage</span><span class="p">(</span>
+</span><span id="__span-3-10"><a id="__codelineno-3-10" name="__codelineno-3-10" href="#__codelineno-3-10"></a><span class="w">                </span><span class="mi">-1</span><span class="p">,</span>
+</span><span id="__span-3-11"><a id="__codelineno-3-11" name="__codelineno-3-11" href="#__codelineno-3-11"></a><span class="w">                </span><span class="mi">10</span><span class="p">,</span>
+</span><span id="__span-3-12"><a id="__codelineno-3-12" name="__codelineno-3-12" href="#__codelineno-3-12"></a><span class="w">                </span><span class="n">FColor</span><span class="o">::</span><span class="n">Cyan</span><span class="p">,</span>
+</span><span id="__span-3-13"><a id="__codelineno-3-13" name="__codelineno-3-13" href="#__codelineno-3-13"></a><span class="w">                </span><span class="n">FString</span><span class="o">::</span><span class="n">Printf</span><span class="p">(</span><span class="n">TEXT</span><span class="p">(</span><span class="s">&quot;Found Subsystem %s&quot;</span><span class="p">),</span>
+</span><span id="__span-3-14"><a id="__codelineno-3-14" name="__codelineno-3-14" href="#__codelineno-3-14"></a><span class="w">                </span><span class="o">*</span><span class="n">OnlineSubsystem</span><span class="o">-&gt;</span><span class="n">GetSubsystemName</span><span class="p">().</span><span class="n">ToString</span><span class="p">())</span>
+</span><span id="__span-3-15"><a id="__codelineno-3-15" name="__codelineno-3-15" href="#__codelineno-3-15"></a><span class="w">            </span><span class="p">);</span>
+</span><span id="__span-3-16"><a id="__codelineno-3-16" name="__codelineno-3-16" href="#__codelineno-3-16"></a><span class="w">        </span><span class="p">}</span>
+</span><span id="__span-3-17"><a id="__codelineno-3-17" name="__codelineno-3-17" href="#__codelineno-3-17"></a><span class="w">    </span><span class="p">}</span><span class="w">    </span>
+</span></code></pre></div>
+<hr />
+<h2 id="creating-a-session">Creating a Session</h2>
+<p>Steam creates sessions for us, which takes time since data has to travel across the internet, so the <code>IOnlineSessionInterface</code> has delegates we can create and bind callbacks to that provide information to us when Steam sends data back to Unreal.</p>
+<p>First, we need a function we can call that will handle creating a session for us:</p>
+<div class="language-cpp highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="n">UFUNCTION</span><span class="p">(</span><span class="n">BlueprintCallable</span><span class="p">)</span>
+</span><span id="__span-4-2"><a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a><span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="n">CreateGameSession</span><span class="p">();</span>
+</span></code></pre></div>
+<blockquote>
+<p>Note that this is NOT called <code>CreateSession()</code> as that function is the blueprint version of what we're about to encapsulate in <code>CreateGameSession()</code></p>
+</blockquote>
+<p>Next we need to create a member variable of type <code>FOnCreateSessionCompleteDelegate</code>:</p>
+<div class="language-cpp highlight"><pre><span></span><code><span id="__span-5-1"><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="n">FOnCreateSessionCompleteDelegate</span><span class="w"> </span><span class="n">CreateSessionCompleteDelegate</span><span class="p">;</span>
+</span></code></pre></div>
+<p>Before we initialize the delegate, we need to create a callback function which has a specific signature:</p>
+<div class="language-cpp highlight"><pre><span></span><code><span id="__span-6-1"><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="kt">void</span><span class="w"> </span><span class="nf">OnCreateSessionComplete_Callback</span><span class="p">(</span><span class="n">FName</span><span class="w"> </span><span class="n">SessionName</span><span class="p">,</span><span class="w"> </span><span class="kt">bool</span><span class="w"> </span><span class="n">bWasSuccessful</span><span class="p">);</span>
+</span></code></pre></div>
+<p>Now can initialize the delegate in the constructor and bind our callback at the same time like so:</p>
+<div class="language-cpp highlight"><pre><span></span><code><span id="__span-7-1"><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a><span class="n">AMenuSystem_MPCharacter</span><span class="o">::</span><span class="n">AMenuSystem_MPCharacter</span><span class="p">()</span><span class="o">:</span>
+</span><span id="__span-7-2"><a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a><span class="w">    </span><span class="n">CreateSessionCompleteDelegate</span><span class="p">(</span><span class="n">FOnCreateSessionCompleteDelegate</span><span class="o">::</span><span class="n">CreateUObject</span><span class="p">(</span><span class="k">this</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">ThisClass</span><span class="o">::</span><span class="n">OnCreateSessionComplete_Callback</span><span class="p">))</span>
+</span><span id="__span-7-3"><a id="__codelineno-7-3" name="__codelineno-7-3" href="#__codelineno-7-3"></a><span class="p">{</span>
+</span><span id="__span-7-4"><a id="__codelineno-7-4" name="__codelineno-7-4" href="#__codelineno-7-4"></a><span class="w">    </span><span class="c1">// other constructor code</span>
+</span><span id="__span-7-5"><a id="__codelineno-7-5" name="__codelineno-7-5" href="#__codelineno-7-5"></a><span class="p">}</span>
+</span></code></pre></div>
+<p>Now that our delegate is setup and the callback is bound to it, we can actually create a session:</p>
+<div class="language-cpp highlight"><pre><span></span><code><span id="__span-8-1"><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a><span class="kt">void</span><span class="w"> </span><span class="nf">AMenuSystem_MPCharacter::CreateGameSession</span><span class="p">()</span>
+</span><span id="__span-8-2"><a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a><span class="p">{</span>
+</span><span id="__span-8-3"><a id="__codelineno-8-3" name="__codelineno-8-3" href="#__codelineno-8-3"></a><span class="w">    </span><span class="c1">// If the session interface is null, return</span>
+</span><span id="__span-8-4"><a id="__codelineno-8-4" name="__codelineno-8-4" href="#__codelineno-8-4"></a><span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="o">!</span><span class="n">OnlineSessionInterface</span><span class="p">.</span><span class="n">IsValid</span><span class="p">())</span><span class="w"> </span><span class="k">return</span><span class="p">;</span>
+</span><span id="__span-8-5"><a id="__codelineno-8-5" name="__codelineno-8-5" href="#__codelineno-8-5"></a>
+</span><span id="__span-8-6"><a id="__codelineno-8-6" name="__codelineno-8-6" href="#__codelineno-8-6"></a><span class="w">    </span><span class="c1">// Check if a session already exists before creating a new one, and if it does, destroy it.</span>
+</span><span id="__span-8-7"><a id="__codelineno-8-7" name="__codelineno-8-7" href="#__codelineno-8-7"></a><span class="w">    </span><span class="n">FNamedOnlineSession</span><span class="o">*</span><span class="w"> </span><span class="n">ExistingSession</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">OnlineSessionInterface</span><span class="o">-&gt;</span><span class="n">GetNamedSession</span><span class="p">(</span><span class="n">NAME_GameSession</span><span class="p">);</span>
+</span><span id="__span-8-8"><a id="__codelineno-8-8" name="__codelineno-8-8" href="#__codelineno-8-8"></a><span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">ExistingSession</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="k">nullptr</span><span class="p">)</span>
+</span><span id="__span-8-9"><a id="__codelineno-8-9" name="__codelineno-8-9" href="#__codelineno-8-9"></a><span class="w">    </span><span class="p">{</span>
+</span><span id="__span-8-10"><a id="__codelineno-8-10" name="__codelineno-8-10" href="#__codelineno-8-10"></a><span class="w">        </span><span class="n">OnlineSessionInterface</span><span class="o">-&gt;</span><span class="n">DestroySession</span><span class="p">(</span><span class="n">NAME_GameSession</span><span class="p">);</span>
+</span><span id="__span-8-11"><a id="__codelineno-8-11" name="__codelineno-8-11" href="#__codelineno-8-11"></a><span class="w">    </span><span class="p">}</span>
+</span><span id="__span-8-12"><a id="__codelineno-8-12" name="__codelineno-8-12" href="#__codelineno-8-12"></a>
+</span><span id="__span-8-13"><a id="__codelineno-8-13" name="__codelineno-8-13" href="#__codelineno-8-13"></a><span class="w">    </span><span class="c1">// Make sure the session interface knows which delegate to fire when Steam successfully creates a session</span>
+</span><span id="__span-8-14"><a id="__codelineno-8-14" name="__codelineno-8-14" href="#__codelineno-8-14"></a><span class="w">    </span><span class="n">OnlineSessionInterface</span><span class="o">-&gt;</span><span class="n">AddOnCreateSessionCompleteDelegate_Handle</span><span class="p">(</span><span class="n">CreateSessionCompleteDelegate</span><span class="p">);</span>
+</span><span id="__span-8-15"><a id="__codelineno-8-15" name="__codelineno-8-15" href="#__codelineno-8-15"></a>
+</span><span id="__span-8-16"><a id="__codelineno-8-16" name="__codelineno-8-16" href="#__codelineno-8-16"></a><span class="w">    </span><span class="c1">// Configure the session settings and create the session</span>
+</span><span id="__span-8-17"><a id="__codelineno-8-17" name="__codelineno-8-17" href="#__codelineno-8-17"></a><span class="w">    </span><span class="n">TSharedPtr</span><span class="o">&lt;</span><span class="n">FOnlineSessionSettings</span><span class="o">&gt;</span><span class="w"> </span><span class="n">SessionSettings</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">MakeShareable</span><span class="p">(</span><span class="k">new</span><span class="w"> </span><span class="n">FOnlineSessionSettings</span><span class="p">());</span>
+</span><span id="__span-8-18"><a id="__codelineno-8-18" name="__codelineno-8-18" href="#__codelineno-8-18"></a><span class="w">    </span><span class="n">SessionSettings</span><span class="o">-&gt;</span><span class="n">bIsLANMatch</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">false</span><span class="p">;</span>
+</span><span id="__span-8-19"><a id="__codelineno-8-19" name="__codelineno-8-19" href="#__codelineno-8-19"></a><span class="w">    </span><span class="n">SessionSettings</span><span class="o">-&gt;</span><span class="n">NumPublicConnections</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">4</span><span class="p">;</span>
+</span><span id="__span-8-20"><a id="__codelineno-8-20" name="__codelineno-8-20" href="#__codelineno-8-20"></a><span class="w">    </span><span class="n">SessionSettings</span><span class="o">-&gt;</span><span class="n">bAllowJoinInProgress</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">true</span><span class="p">;</span>
+</span><span id="__span-8-21"><a id="__codelineno-8-21" name="__codelineno-8-21" href="#__codelineno-8-21"></a><span class="w">    </span><span class="n">SessionSettings</span><span class="o">-&gt;</span><span class="n">bAllowJoinViaPresence</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">true</span><span class="p">;</span>
+</span><span id="__span-8-22"><a id="__codelineno-8-22" name="__codelineno-8-22" href="#__codelineno-8-22"></a><span class="w">    </span><span class="n">SessionSettings</span><span class="o">-&gt;</span><span class="n">bShouldAdvertise</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">true</span><span class="p">;</span>
+</span><span id="__span-8-23"><a id="__codelineno-8-23" name="__codelineno-8-23" href="#__codelineno-8-23"></a><span class="w">    </span><span class="n">SessionSettings</span><span class="o">-&gt;</span><span class="n">bUsesPresence</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">true</span><span class="p">;</span>
+</span><span id="__span-8-24"><a id="__codelineno-8-24" name="__codelineno-8-24" href="#__codelineno-8-24"></a><span class="w">    </span><span class="n">SessionSettings</span><span class="o">-&gt;</span><span class="n">bUseLobbiesIfAvailable</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">true</span><span class="p">;</span>
+</span><span id="__span-8-25"><a id="__codelineno-8-25" name="__codelineno-8-25" href="#__codelineno-8-25"></a><span class="w">    </span><span class="k">const</span><span class="w"> </span><span class="n">ULocalPlayer</span><span class="o">*</span><span class="w"> </span><span class="n">LocalPlayer</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">GetWorld</span><span class="p">()</span><span class="o">-&gt;</span><span class="n">GetFirstLocalPlayerFromController</span><span class="p">();</span>
+</span><span id="__span-8-26"><a id="__codelineno-8-26" name="__codelineno-8-26" href="#__codelineno-8-26"></a><span class="w">    </span><span class="n">OnlineSessionInterface</span><span class="o">-&gt;</span><span class="n">CreateSession</span><span class="p">(</span><span class="o">*</span><span class="n">LocalPlayer</span><span class="o">-&gt;</span><span class="n">GetPreferredUniqueNetId</span><span class="p">(),</span><span class="w"> </span><span class="n">NAME_GameSession</span><span class="p">,</span><span class="w"> </span><span class="o">*</span><span class="n">SessionSettings</span><span class="p">);</span>
+</span><span id="__span-8-27"><a id="__codelineno-8-27" name="__codelineno-8-27" href="#__codelineno-8-27"></a><span class="p">}</span>
 </span></code></pre></div>
 
 
